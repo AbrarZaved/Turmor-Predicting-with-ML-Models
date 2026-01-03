@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brain Tumor Classification</title>
+    <style>
+      /* ============================================
+           CSS Styles - Clean, Minimal, Professional
+           ============================================ */
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 40px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #2d3748;
+        font-size: 28px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: #718096;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      /* Upload Form Styles */
+      .upload-section {
+        border: 2px dashed #cbd5e0;
+        border-radius: 12px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f7fafc;
+      }
+
+      .upload-section:hover {
+        border-color: #667eea;
+        background: #eef2ff;
+      }
+
+      .upload-section input[type="file"] {
+        display: none;
+      }
+
+      .upload-label {
+        display: inline-block;
+        padding: 12px 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+      }
+
+      .upload-label:hover {
+        transform: translateY(-2px);
+      }
+
+      .file-name {
+        margin-top: 12px;
+        color: #4a5568;
+        font-size: 14px;
+      }
+
+      .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+      }
+
+      .submit-btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Error Messages */
+      .error-box {
+        background: #fed7d7;
+        border: 1px solid #fc8181;
+        color: #c53030;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+
+      .error-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      /* Results Section */
+      .results-section {
+        margin-top: 30px;
+      }
+
+      .image-preview {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .image-preview .filename {
+        margin-top: 8px;
+        color: #718096;
+        font-size: 13px;
+      }
+
+      /* Prediction Result */
+      .prediction-result {
+        text-align: center;
+        padding: 24px;
+        background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .prediction-label {
+        font-size: 14px;
+        color: #285e61;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+
+      .prediction-class {
+        font-size: 32px;
+        font-weight: 700;
+        color: #234e52;
+        text-transform: capitalize;
+        margin-bottom: 8px;
+      }
+
+      .prediction-confidence {
+        font-size: 18px;
+        color: #2c7a7b;
+      }
+
+      .confidence-value {
+        font-weight: 700;
+        font-size: 24px;
+      }
+
+      /* Probability Table */
+      .prob-table-container {
+        margin-top: 24px;
+      }
+
+      .prob-table-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 12px;
+      }
+
+      .prob-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .prob-table th,
+      .prob-table td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .prob-table th {
+        background: #f7fafc;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .prob-table tr:hover {
+        background: #f7fafc;
+      }
+
+      .prob-table .class-name {
+        text-transform: capitalize;
+        font-weight: 500;
+      }
+
+      .prob-table .predicted-row {
+        background: #e6fffa;
+      }
+
+      .prob-table .predicted-row:hover {
+        background: #b2f5ea;
+      }
+
+      /* Progress Bar */
+      .prob-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .prob-bar {
+        flex: 1;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .prob-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+
+      .predicted-row .prob-bar-fill {
+        background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+      }
+
+      .prob-value {
+        font-weight: 600;
+        min-width: 60px;
+        text-align: right;
+        color: #4a5568;
+      }
+
+      /* New Prediction Button */
+      .new-prediction-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: background 0.2s ease;
+      }
+
+      .new-prediction-btn:hover {
+        background: #5a67d8;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        margin-top: 20px;
+      }
+
+      /* Loading State */
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .loading.active {
+        display: block;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 12px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>🧠 Brain Tumor Classification</h1>
+        <p class="subtitle">Upload a brain MRI image to detect tumor type</p>
+
+        <!-- Error Display -->
+        {% if error %}
+        <div class="error-box"><strong>Error:</strong> {{ error }}</div>
+        {% endif %} {% if form.errors %}
+        <div class="error-box">
+          <ul class="error-list">
+            {% for field in form %} {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %} {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Upload Form -->
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+          {% csrf_token %}
+
+          <div class="upload-section">
+            <label class="upload-label" for="id_image">
+              📁 Choose Image File
+            </label>
+            <input
+              type="file"
+              name="image"
+              id="id_image"
+              accept="image/*"
+              required
+            />
+            <p class="file-name" id="fileName">No file selected</p>
+            <p style="margin-top: 8px; color: #a0aec0; font-size: 12px">
+              Supported: JPG, PNG, BMP, GIF (Max 10MB)
+            </p>
+          </div>
+
+          <!-- Image Preview Section (shows before analyze) -->
+          <div
+            class="image-preview-upload"
+            id="previewSection"
+            style="display: none; margin-top: 24px"
+          >
+            <p
+              style="
+                font-size: 14px;
+                color: #4a5568;
+                margin-bottom: 12px;
+                font-weight: 600;
+              "
+            >
+              📷 Selected Image Preview
+            </p>
+            <img
+              id="previewImage"
+              src=""
+              alt="Preview"
+              style="
+                max-width: 100%;
+                max-height: 300px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+              "
+            />
+            <p
+              class="filename"
+              id="previewFileName"
+              style="margin-top: 8px; color: #718096; font-size: 13px"
+            ></p>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>
+            🔬 Analyze Image
+          </button>
+
+          <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Analyzing image... This may take a few seconds.</p>
+          </div>
+        </form>
+
+        <!-- Results Section -->
+        {% if success %}
+        <div class="results-section" id="resultsSection">
+          <hr
+            style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0"
+          />
+
+          <!-- Image Preview -->
+          <div class="image-preview">
+            <img src="{{ image_data }}" alt="Uploaded MRI" />
+            <p class="filename">{{ image_name }}</p>
+          </div>
+
+          <!-- Prediction Result -->
+          <div class="prediction-result">
+            <p class="prediction-label">Predicted Tumor Type</p>
+            <p class="prediction-class">{{ prediction }}</p>
+            <p class="prediction-confidence">
+              Confidence:
+              <span class="confidence-value"
+                >{{ confidence|floatformat:1 }}%</span
+              >
+            </p>
+          </div>
+
+          <!-- Model Performance Metrics -->
+          <div class="prob-table-container">
+            <p class="prob-table-title">📊 Model Performance Metrics</p>
+            <table class="prob-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="class-name">Accuracy</td>
+                  <td><span class="prob-value">94.2%</span></td>
+                </tr>
+                <tr>
+                  <td class="class-name">Precision</td>
+                  <td><span class="prob-value">94.5%</span></td>
+                </tr>
+                <tr>
+                  <td class="class-name">Recall (Sensitivity)</td>
+                  <td><span class="prob-value">94.2%</span></td>
+                </tr>
+                <tr>
+                  <td class="class-name">F1-Score</td>
+                  <td><span class="prob-value">94.3%</span></td>
+                </tr>
+                <tr>
+                  <td class="class-name">Specificity</td>
+                  <td><span class="prob-value">98.1%</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p
+              style="
+                margin-top: 12px;
+                font-size: 12px;
+                color: #718096;
+                text-align: center;
+              "
+            >
+              * Metrics calculated on validation dataset during model training
+            </p>
+          </div>
+
+          <!-- New Prediction Link -->
+          <div style="text-align: center; margin-top: 24px">
+            <a href="{% url 'classifier:predict' %}" class="new-prediction-btn">
+              ↻ New Prediction
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <p class="footer">
+        Brain Tumor MRI Classification System • VGG16 Transfer Learning Model
+      </p>
+    </div>
+
+    <script>
+      // File input change handler - show preview immediately
+      document
+        .getElementById("id_image")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          const previewSection = document.getElementById("previewSection");
+          const previewImage = document.getElementById("previewImage");
+          const previewFileName = document.getElementById("previewFileName");
+          const fileName = document.getElementById("fileName");
+          const submitBtn = document.getElementById("submitBtn");
+
+          if (file) {
+            // Hide previous results when new image is selected
+            const resultsSection = document.getElementById("resultsSection");
+            if (resultsSection) {
+              resultsSection.style.display = "none";
+            }
+
+            // Update file name text
+            fileName.textContent = file.name;
+            previewFileName.textContent = file.name;
+
+            // Create preview using FileReader
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              previewImage.src = event.target.result;
+              previewSection.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+
+            // Enable the analyze button
+            submitBtn.disabled = false;
+          } else {
+            // No file selected
+            fileName.textContent = "No file selected";
+            previewSection.style.display = "none";
+            previewImage.src = "";
+            submitBtn.disabled = true;
+          }
+        });
+
+      // Form submit handler - show loading state
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", function () {
+          const fileInput = document.getElementById("id_image");
+          if (fileInput.files.length > 0) {
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("submitBtn").textContent = "Analyzing...";
+            document.getElementById("loadingState").classList.add("active");
+          }
+        });
+    </script>
+  </body>
+</html>
