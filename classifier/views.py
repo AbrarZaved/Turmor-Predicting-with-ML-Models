@@ -4,13 +4,14 @@ Views for Brain Tumor Classification.
 Main view handles:
 1. GET: Display upload form
 2. POST: Process image, run inference, display results
+
+Model is imported from ml_model.py (loaded ONCE at startup).
 """
 
 from django.shortcuts import render
-from django.conf import settings
 
 from .forms import ImageUploadForm
-from .model_loader import ModelLoader
+from .ml_model import model, CLASS_NAMES  # Model loaded ONCE at import
 from .preprocessing import preprocess_image, get_original_image_base64
 
 
@@ -31,7 +32,7 @@ def predict_view(request):
     """
     context = {
         "form": ImageUploadForm(),
-        "class_names": settings.CLASS_NAMES,
+        "class_names": CLASS_NAMES,
     }
 
     if request.method == "POST":
@@ -44,30 +45,25 @@ def predict_view(request):
                 image_file = form.cleaned_data["image"]
 
                 # Convert to base64 for preview display
-                # (We don't save to disk to keep it minimal)
                 image_data = get_original_image_base64(image_file)
                 context["image_data"] = image_data
                 context["image_name"] = image_file.name
 
-                # Preprocess image for model
+                # Preprocess image for model (OpenCV-based, no TensorFlow)
                 preprocessed = preprocess_image(image_file)
 
-                # Load model (lazy singleton - loads once, cached thereafter)
-                model = ModelLoader.get_model()
-
-                # Run inference
-                # Output shape: (1, 4) - probabilities for each class
+                # Run inference using pre-loaded model
                 predictions = model.predict(preprocessed, verbose=0)
                 probabilities = predictions[0]  # Get first (and only) batch item
 
                 # Get predicted class
                 predicted_idx = int(probabilities.argmax())
-                predicted_class = settings.CLASS_NAMES[predicted_idx]
+                predicted_class = CLASS_NAMES[predicted_idx]
                 confidence = float(probabilities[predicted_idx]) * 100
 
                 # Build all predictions list for display
                 all_predictions = []
-                for idx, class_name in enumerate(settings.CLASS_NAMES):
+                for idx, class_name in enumerate(CLASS_NAMES):
                     prob = float(probabilities[idx]) * 100
                     all_predictions.append(
                         {
@@ -87,6 +83,8 @@ def predict_view(request):
                 context["success"] = True
 
             except FileNotFoundError as e:
+                context["error"] = str(e)
+            except ValueError as e:
                 context["error"] = str(e)
             except Exception as e:
                 context["error"] = f"Prediction failed: {str(e)}"

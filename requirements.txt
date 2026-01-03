@@ -1,14 +1,21 @@
 # Brain Tumor Classification - Dependencies
-# Python 3.10+
+# Python 3.10+ | Optimized for Render Free Tier
 
 # Web Framework
 Django>=4.2,<5.0
 
-# Machine Learning (CPU-only for Render Free tier)
-tensorflow-cpu>=2.16.0
+# Machine Learning (CPU-only, pinned version for stability)
+tensorflow-cpu==2.15.0
+
+# Numerical Computing
+numpy
 
 # Image Processing
-Pillow>=10.0.0
+pillow
+opencv-python-headless
 
-# Server
-gunicorn>=21.0.0
+# Production Server
+gunicorn
+
+# Static Files (for Render)
+whitenoise
