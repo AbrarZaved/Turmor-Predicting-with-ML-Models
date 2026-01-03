@@ -28,12 +28,15 @@ tf.config.set_visible_devices([], "GPU")
 # =============================================================================
 # MODEL PATH CONFIGURATION
 # =============================================================================
-# Model is in the parent directory of brain_tumor_app
+# BASE_DIR is the Django project root (where manage.py is)
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR.parent / "1_brain_tumor_vgg16.keras"
 
-# Alternative: If model is inside classifier/model/ directory
-# MODEL_PATH = Path(__file__).resolve().parent / "model" / "model.keras"
+# Model file should be in the same directory as manage.py
+MODEL_PATH = BASE_DIR / "1_brain_tumor_vgg16.keras"
+
+# Alternative paths (uncomment if model is elsewhere):
+# MODEL_PATH = BASE_DIR / "classifier" / "model" / "model.keras"
+# MODEL_PATH = Path("/opt/render/project/src/1_brain_tumor_vgg16.keras")
 
 # =============================================================================
 # LOAD MODEL ONCE AT MODULE IMPORT
